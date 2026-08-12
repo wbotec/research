@@ -190,8 +190,8 @@ textarea:focus-visible, textarea:focus{outline:2px solid var(--gold);outline-off
 
 <script>
 const STEPS = [
-  {key:'institution', text:'What is the name of your institution?', type:'text', short:true},
-  {key:'respondentName', text:'What is your full name?', type:'text', short:true},
+  {key:'institution', text:'What is the name of your institution?', type:'text', short:true, optional:true},
+  {key:'respondentName', text:'What is your full name?', type:'text', short:true, optional:true},
   {key:'email', text:'What is your email address?', type:'text', short:true, optional:true},
   {key:'q1', text:'What is your role on the Board?', type:'single', other:true,
    options:['Board Chairperson','Vice Chairperson','Independent Director','Non-Executive Director','Committee Chairperson','Chief Executive Officer (Ex Officio)','Other (Specify)']},
@@ -220,6 +220,8 @@ const STEPS = [
 ];
 
 const ADMIN_CODE = 'board2026';
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Paste the Web app URL you get after deploying Code.gs (Deploy > New deployment > Web app).
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwRjUbaf-aXIrcV6da71syjCE978TzTxbBPcFdVorx79axPIPd2R5UC0hE2ccpoMm7uXA/exec';
@@ -263,14 +265,7 @@ function header(){
   const left = el('div');
   left.appendChild(el('div','mark','TIER 2 MFI \u2014 TANZANIA'));
   left.appendChild(el('div','title','Board Remuneration Benchmarking Survey'));
-  const btn = el('button','admin-link', state.view==='dashboard' || state.view==='gate' ? 'Back to survey' : 'View results (admin)');
-  btn.onclick = () => {
-    if(state.view==='dashboard' || state.view==='gate'){ state.view='landing'; }
-    else { state.view='gate'; state.gateError=''; }
-    render();
-  };
   bar.appendChild(left);
-  bar.appendChild(btn);
   return bar;
 }
 
@@ -279,14 +274,8 @@ function landing(){
   card.appendChild(el('p','subtitle','This 10-question survey benchmarks sitting allowances, retainer fees, chairperson premiums, governance practices and market competitiveness among Tier 2 Microfinance Institutions in Tanzania.'));
 
   const meta = el('div','meta-row');
-  meta.innerHTML = '<div><b>10</b> questions</div><div><b>~5 min</b> to complete</div><div><b>Aggregate</b> reporting only</div>';
+  meta.innerHTML = '<div><b>10</b> questions</div><div><b>~2 min</b> to complete</div>';
   card.appendChild(meta);
-
-  const chips = el('div','themes');
-  ['Sitting allowances','Retainer fees','Chairperson premium','Governance practices','Market competitiveness'].forEach(t=>{
-    chips.appendChild(el('div','theme-chip',t));
-  });
-  card.appendChild(chips);
 
   const conf = el('div','confidential','Responses are collected for benchmarking purposes only and reported in aggregate form. Individual responses remain confidential and are not attributed to you or your institution.');
   card.appendChild(conf);
@@ -299,6 +288,10 @@ function landing(){
 
 function isAnswered(step){
   const a = state.answers[step.key];
+  if(step.key==='email'){
+    if(!a) return !!step.optional;
+    return EMAIL_RE.test(a);
+  }
   if(step.optional) return true;
   if(step.type==='multi') return Array.isArray(a) && a.length>0;
   return a!==undefined && a!==null && a!=='';
@@ -399,9 +392,22 @@ function surveyView(){
     ti.className='other-input'; ti.type = step.key==='email' ? 'email' : 'text';
     ti.placeholder = step.optional ? 'Optional' : 'Type your answer';
     ti.value = state.answers[step.key]||'';
-    ti.oninput = (e)=>{ state.answers[step.key]=e.target.value; syncNextButton(step); };
     ti.style.fontSize = '16px'; ti.style.padding='14px 16px';
     body.appendChild(ti);
+
+    let err;
+    if(step.key==='email'){
+      err = el('div','gate-error','Please enter a valid email address.');
+      err.style.marginTop='8px';
+      err.style.display = ti.value && !EMAIL_RE.test(ti.value) ? 'block' : 'none';
+      body.appendChild(err);
+    }
+
+    ti.oninput = (e)=>{
+      state.answers[step.key]=e.target.value;
+      if(err) err.style.display = e.target.value && !EMAIL_RE.test(e.target.value) ? 'block' : 'none';
+      syncNextButton(step);
+    };
   }
   else if(step.type==='text'){
     const ta = document.createElement('textarea');
@@ -494,12 +500,6 @@ function thanksView(){
   card.appendChild(el('div',null,'Thank you \u2014 your response has been recorded.'));
   card.querySelector('div:last-child').style.fontFamily = "'Fraunces',serif";
   card.querySelector('div:last-child').style.fontSize = '18px';
-  const sub = el('p','subtitle','Your answers will be pooled with other institutions and reported only in aggregate form.');
-  sub.style.margin = '12px auto 24px'; sub.style.textAlign='center';
-  card.appendChild(sub);
-  const again = el('button','btn secondary','Submit another response');
-  again.onclick = ()=>{ state.answers={}; state.otherText={}; state.step=0; state.view='survey'; render(); };
-  card.appendChild(again);
   return card;
 }
 
