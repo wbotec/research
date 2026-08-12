@@ -190,9 +190,6 @@ textarea:focus-visible, textarea:focus{outline:2px solid var(--gold);outline-off
 
 <script>
 const STEPS = [
-  {key:'institution', text:'What is the name of your institution?', type:'text', short:true, optional:true},
-  {key:'respondentName', text:'What is your full name?', type:'text', short:true, optional:true},
-  {key:'email', text:'What is your email address?', type:'text', short:true, optional:true},
   {key:'q1', text:'What is your role on the Board?', type:'single', other:true,
    options:['Board Chairperson','Vice Chairperson','Independent Director','Non-Executive Director','Committee Chairperson','Chief Executive Officer (Ex Officio)','Other (Specify)']},
   {key:'q2', text:'How many years have you served on the Board?', type:'single',
@@ -220,8 +217,6 @@ const STEPS = [
 ];
 
 const ADMIN_CODE = 'board2026';
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Paste the Web app URL you get after deploying Code.gs (Deploy > New deployment > Web app).
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwRjUbaf-aXIrcV6da71syjCE978TzTxbBPcFdVorx79axPIPd2R5UC0hE2ccpoMm7uXA/exec';
@@ -288,10 +283,6 @@ function landing(){
 
 function isAnswered(step){
   const a = state.answers[step.key];
-  if(step.key==='email'){
-    if(!a) return !!step.optional;
-    return EMAIL_RE.test(a);
-  }
   if(step.optional) return true;
   if(step.type==='multi') return Array.isArray(a) && a.length>0;
   return a!==undefined && a!==null && a!=='';
@@ -323,7 +314,7 @@ function surveyView(){
   mp.appendChild(track);
   card.appendChild(mp);
 
-  const eyebrow = step.key==='comment' ? 'Optional \u2014 Final comment' : (step.short ? 'Before we begin' : `Question ${state.step+1}`);
+  const eyebrow = step.key==='comment' ? 'Optional \u2014 Final comment' : `Question ${state.step+1}`;
   card.appendChild(el('div','q-eyebrow', eyebrow));
   card.appendChild(el('div','q-text', step.text));
 
@@ -386,28 +377,6 @@ function surveyView(){
       row.appendChild(btn);
     });
     body.appendChild(row);
-  }
-  else if(step.type==='text' && step.short){
-    const ti = document.createElement('input');
-    ti.className='other-input'; ti.type = step.key==='email' ? 'email' : 'text';
-    ti.placeholder = step.optional ? 'Optional' : 'Type your answer';
-    ti.value = state.answers[step.key]||'';
-    ti.style.fontSize = '16px'; ti.style.padding='14px 16px';
-    body.appendChild(ti);
-
-    let err;
-    if(step.key==='email'){
-      err = el('div','gate-error','Please enter a valid email address.');
-      err.style.marginTop='8px';
-      err.style.display = ti.value && !EMAIL_RE.test(ti.value) ? 'block' : 'none';
-      body.appendChild(err);
-    }
-
-    ti.oninput = (e)=>{
-      state.answers[step.key]=e.target.value;
-      if(err) err.style.display = e.target.value && !EMAIL_RE.test(e.target.value) ? 'block' : 'none';
-      syncNextButton(step);
-    };
   }
   else if(step.type==='text'){
     const ta = document.createElement('textarea');

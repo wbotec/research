@@ -19,9 +19,6 @@ const SHEET_NAME = 'Responses';
 
 const COLUMN_ORDER = [
   'submittedAt',
-  'institution',
-  'respondentName',
-  'email',
   'q1',
   'q2',
   'q3',
