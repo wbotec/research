@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Board Remuneration Benchmarking Survey</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root{
+  --ink:#16233B;
+  --parchment:#F1ECDD;
+  --gold:#C89B3C;
+  --green:#3F6B4F;
+  --slate:#5B6472;
+  --rust:#B5502D;
+  --card:#FFFFFF;
+  --line: rgba(22,35,59,0.14);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--parchment);
+  color:var(--ink);
+  font-family:'Inter',sans-serif;
+  min-height:100%;
+  -webkit-font-smoothing:antialiased;
+}
+#root{min-height:100vh;}
+.wrap{max-width:960px;margin:0 auto;padding:32px 24px 64px;}
+
+/* ---------- header ---------- */
+.topbar{
+  display:flex;justify-content:space-between;align-items:baseline;
+  border-bottom:1px solid var(--line);
+  padding-bottom:16px;margin-bottom:8px;
+}
+.mark{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.14em;
+  text-transform:uppercase;color:var(--slate);
+}
+.title{
+  font-family:'Fraunces',serif;font-weight:500;font-size:clamp(24px,3.4vw,34px);
+  line-height:1.15;margin:4px 0 0;
+}
+.subtitle{color:var(--slate);font-size:14.5px;margin-top:6px;max-width:560px;line-height:1.5;}
+
+.admin-link{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--slate);
+  background:none;border:none;cursor:pointer;text-decoration:underline;
+  text-underline-offset:3px;padding:0;
+}
+.admin-link:hover{color:var(--ink);}
+
+/* ---------- landing ---------- */
+.landing-card{
+  background:var(--card);border:1px solid var(--line);border-radius:2px;
+  padding:40px clamp(20px,4vw,48px);margin-top:28px;
+}
+.meta-row{display:flex;gap:28px;flex-wrap:wrap;margin:20px 0 28px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--slate);}
+.meta-row b{color:var(--ink);font-weight:500;}
+.themes{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px;}
+.theme-chip{
+  border:1px solid var(--green);color:var(--green);font-size:12px;
+  padding:5px 12px;border-radius:20px;font-weight:500;
+}
+.confidential{
+  border-left:3px solid var(--gold);padding:10px 16px;background:rgba(200,155,60,0.08);
+  font-size:13.5px;color:var(--ink);line-height:1.55;margin-bottom:28px;
+}
+.btn{
+  font-family:'Inter',sans-serif;font-weight:600;font-size:15px;
+  background:var(--ink);color:var(--parchment);border:none;
+  padding:14px 26px;border-radius:2px;cursor:pointer;
+  transition:background .15s ease;
+}
+.btn:hover{background:#243554;}
+.btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.btn.secondary{background:none;color:var(--ink);border:1px solid var(--ink);}
+.btn.secondary:hover{background:rgba(22,35,59,0.06);}
+.btn:disabled{opacity:0.35;cursor:not-allowed;}
+
+/* ---------- survey layout ---------- */
+.survey-shell{display:flex;gap:36px;margin-top:28px;align-items:flex-start;}
+.ledger{
+  width:64px;flex-shrink:0;display:flex;flex-direction:column;gap:0;
+  border-right:1px solid var(--line);padding-right:14px;
+}
+.ledger-item{
+  font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--slate);
+  padding:9px 0;display:flex;align-items:center;gap:8px;
+}
+.ledger-num{
+  width:20px;height:20px;border-radius:50%;border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;
+}
+.ledger-item.done .ledger-num{background:var(--green);border-color:var(--green);color:#fff;}
+.ledger-item.current .ledger-num{background:var(--gold);border-color:var(--gold);color:#fff;}
+.ledger-item.current{color:var(--ink);font-weight:600;}
+
+.mobile-progress{display:none;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--slate);margin-bottom:14px;}
+.mobile-progress-bar{height:3px;background:var(--line);border-radius:3px;margin-top:6px;overflow:hidden;}
+.mobile-progress-fill{height:100%;background:var(--gold);transition:width .25s ease;}
+
+.q-card{
+  flex:1;background:var(--card);border:1px solid var(--line);border-radius:2px;
+  padding:clamp(22px,4vw,44px);min-height:340px;display:flex;flex-direction:column;
+}
+.q-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.1em;color:var(--gold);text-transform:uppercase;margin-bottom:10px;}
+.q-text{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(19px,2.6vw,24px);line-height:1.3;margin:0 0 24px;}
+.q-body{flex:1;}
+
+.option{
+  display:flex;align-items:center;gap:12px;padding:13px 16px;
+  border:1px solid var(--line);border-radius:2px;margin-bottom:9px;
+  cursor:pointer;transition:border-color .12s ease, background .12s ease;
+}
+.option:hover{border-color:var(--gold);}
+.option.selected{border-color:var(--green);background:rgba(63,107,79,0.06);}
+.option input{accent-color:var(--green);width:16px;height:16px;flex-shrink:0;}
+.option span{font-size:14.5px;line-height:1.4;}
+.option:focus-within{outline:2px solid var(--gold);outline-offset:1px;}
+
+.other-input{
+  width:100%;margin-top:8px;padding:10px 12px;font-family:'Inter',sans-serif;
+  font-size:14px;border:1px solid var(--line);border-radius:2px;background:var(--parchment);
+}
+.other-input:focus-visible, .other-input:focus{outline:2px solid var(--gold);outline-offset:1px;}
+
+.rating-row{display:flex;gap:8px;flex-wrap:wrap;}
+.rating-btn{
+  flex:1;min-width:90px;border:1px solid var(--line);border-radius:2px;background:none;
+  padding:16px 8px;cursor:pointer;text-align:center;font-family:'Inter',sans-serif;
+}
+.rating-btn b{display:block;font-family:'IBM Plex Mono',monospace;font-size:20px;color:var(--slate);margin-bottom:6px;}
+.rating-btn span{font-size:11.5px;color:var(--slate);line-height:1.3;display:block;}
+.rating-btn.selected{border-color:var(--gold);background:rgba(200,155,60,0.09);}
+.rating-btn.selected b{color:var(--gold);}
+.rating-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+
+textarea{
+  width:100%;min-height:130px;font-family:'Inter',sans-serif;font-size:14.5px;
+  border:1px solid var(--line);border-radius:2px;padding:14px;resize:vertical;background:var(--parchment);
+}
+textarea:focus-visible, textarea:focus{outline:2px solid var(--gold);outline-offset:1px;}
+
+.q-nav{display:flex;justify-content:space-between;align-items:center;margin-top:28px;padding-top:20px;border-top:1px solid var(--line);}
+.hint{font-size:12px;color:var(--slate);}
+
+/* ---------- thanks ---------- */
+.thanks-card{background:var(--card);border:1px solid var(--line);padding:56px 40px;text-align:center;margin-top:28px;}
+.thanks-mark{width:46px;height:46px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-family:'Fraunces',serif;font-size:22px;}
+
+/* ---------- dashboard ---------- */
+.gate-card{background:var(--card);border:1px solid var(--line);padding:40px;margin-top:28px;max-width:420px;}
+.gate-card input{width:100%;padding:12px 14px;font-family:'IBM Plex Mono',monospace;font-size:14px;border:1px solid var(--line);border-radius:2px;margin:14px 0;background:var(--parchment);}
+.gate-error{color:var(--rust);font-size:13px;margin-top:-6px;margin-bottom:14px;}
+
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin:24px 0 32px;}
+.stat{background:var(--card);border:1px solid var(--line);padding:18px;}
+.stat b{display:block;font-family:'Fraunces',serif;font-size:28px;color:var(--ink);}
+.stat span{font-size:12px;color:var(--slate);}
+
+.dash-section{background:var(--card);border:1px solid var(--line);padding:26px clamp(18px,3vw,34px);margin-bottom:18px;}
+.dash-q{font-family:'Fraunces',serif;font-size:16.5px;font-weight:500;margin:0 0 16px;}
+.bar-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.bar-label{width:220px;flex-shrink:0;font-size:12.5px;color:var(--ink);text-align:right;line-height:1.3;}
+.bar-track{flex:1;height:18px;background:var(--parchment);border:1px solid var(--line);position:relative;}
+.bar-fill{height:100%;background:var(--gold);}
+.bar-count{width:46px;flex-shrink:0;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--slate);}
+
+.comment-item{border-bottom:1px solid var(--line);padding:12px 0;font-size:13.5px;line-height:1.55;}
+.comment-item:last-child{border-bottom:none;}
+
+.dash-toolbar{display:flex;justify-content:space-between;align-items:center;margin-top:28px;margin-bottom:8px;flex-wrap:wrap;gap:12px;}
+
+.loading{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--slate);padding:40px 0;text-align:center;}
+.empty{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--slate);padding:20px 0;}
+
+@media (max-width:680px){
+  .survey-shell{flex-direction:column;}
+  .ledger{display:none;}
+  .mobile-progress{display:block;}
+  .bar-label{width:120px;font-size:11.5px;}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+const STEPS = [
+  {key:'institution', text:'What is the name of your institution?', type:'text', short:true},
+  {key:'respondentName', text:'What is your full name?', type:'text', short:true},
+  {key:'email', text:'What is your email address?', type:'text', short:true, optional:true},
+  {key:'q1', text:'What is your role on the Board?', type:'single', other:true,
+   options:['Board Chairperson','Vice Chairperson','Independent Director','Non-Executive Director','Committee Chairperson','Chief Executive Officer (Ex Officio)','Other (Specify)']},
+  {key:'q2', text:'How many years have you served on the Board?', type:'single',
+   options:['Less than 2 years','2-5 years','6-10 years','More than 10 years']},
+  {key:'q3', text:'How many Board meetings does your institution hold annually?', type:'single',
+   options:['4 or fewer','5-6','7-8','More than 8']},
+  {key:'q4', text:'What remuneration components are provided to Board members?', type:'multi', other:true,
+   options:['Annual Retainer Fee','Board Sitting Allowance','Committee Sitting Allowance','Transport Allowance','Communication Allowance','Medical Benefits','Other (Specify)']},
+  {key:'q5', text:'What is the current Board Sitting Allowance paid per meeting?', type:'single',
+   options:['Less than TZS 300,000','TZS 300,000-500,000','TZS 500,001-750,000','TZS 750,001-1,000,000','Above TZS 1,000,000']},
+  {key:'q6', text:'What is the annual retainer fee paid to an ordinary Board member?', type:'single',
+   options:['No annual retainer','Less than TZS 3 million','TZS 3-5 million','TZS 5-10 million','Above TZS 10 million']},
+  {key:'q7', text:'How is the Board Chairperson remunerated compared to other Board members?', type:'single',
+   options:['Same remuneration','Up to 25% higher','26-50% higher','51-100% higher','More than 100% higher']},
+  {key:'q8', text:'Does your institution have a formal Board Remuneration Policy?', type:'single',
+   options:['Yes','No','Under development']},
+  {key:'q9', text:'How often is Board remuneration reviewed?', type:'single',
+   options:['Annually','Every 2 years','Every 3 years','Only when necessary','Never reviewed']},
+  {key:'q10', text:'How competitive is your Board remuneration compared with other Tier 2 Microfinance Institutions in Tanzania?', type:'rating',
+   options:[
+     {v:1,l:'Much Lower than Market'},{v:2,l:'Slightly Lower'},{v:3,l:'About Market Average'},
+     {v:4,l:'Slightly Above Market'},{v:5,l:'Significantly Above Market'}
+   ]},
+  {key:'comment', text:'Any recommendations for improving Board remuneration practices in Tanzania\u2019s Tier 2 microfinance sector?', type:'text', optional:true}
+];
+
+const ADMIN_CODE = 'board2026';
+
+// Paste the Web app URL you get after deploying Code.gs (Deploy > New deployment > Web app).
+const SCRIPT_URL = 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE';
+// Paste the shareable link to your Google Sheet (the one Code.gs writes into).
+const SHEET_URL = 'PASTE_YOUR_GOOGLE_SHEET_LINK_HERE';
+
+let state = {
+  view: 'landing',        // landing | survey | thanks | gate | dashboard
+  step: 0,
+  answers: {},
+  otherText: {},
+  submitting: false,
+  gateError: '',
+  dashLoading: false,
+  dashError: '',
+  responses: null
+};
+
+function render(){
+  const root = document.getElementById('root');
+  root.innerHTML = '';
+  const wrap = el('div','wrap');
+  wrap.appendChild(header());
+  if(state.view==='landing') wrap.appendChild(landing());
+  else if(state.view==='survey') wrap.appendChild(surveyView());
+  else if(state.view==='thanks') wrap.appendChild(thanksView());
+  else if(state.view==='gate') wrap.appendChild(gateView());
+  else if(state.view==='dashboard') wrap.appendChild(dashboardView());
+  root.appendChild(wrap);
+}
+
+function el(tag, cls, text){
+  const e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(text!==undefined) e.textContent = text;
+  return e;
+}
+
+function header(){
+  const bar = el('div','topbar');
+  const left = el('div');
+  left.appendChild(el('div','mark','TIER 2 MFI \u2014 TANZANIA'));
+  left.appendChild(el('div','title','Board Remuneration Benchmarking Survey'));
+  const btn = el('button','admin-link', state.view==='dashboard' || state.view==='gate' ? 'Back to survey' : 'View results (admin)');
+  btn.onclick = () => {
+    if(state.view==='dashboard' || state.view==='gate'){ state.view='landing'; }
+    else { state.view='gate'; state.gateError=''; }
+    render();
+  };
+  bar.appendChild(left);
+  bar.appendChild(btn);
+  return bar;
+}
+
+function landing(){
+  const card = el('div','landing-card');
+  card.appendChild(el('p','subtitle','This 10-question survey benchmarks sitting allowances, retainer fees, chairperson premiums, governance practices and market competitiveness among Tier 2 Microfinance Institutions in Tanzania.'));
+
+  const meta = el('div','meta-row');
+  meta.innerHTML = '<div><b>10</b> questions</div><div><b>~5 min</b> to complete</div><div><b>Aggregate</b> reporting only</div>';
+  card.appendChild(meta);
+
+  const chips = el('div','themes');
+  ['Sitting allowances','Retainer fees','Chairperson premium','Governance practices','Market competitiveness'].forEach(t=>{
+    chips.appendChild(el('div','theme-chip',t));
+  });
+  card.appendChild(chips);
+
+  const conf = el('div','confidential','Responses are collected for benchmarking purposes only and reported in aggregate form. Individual responses remain confidential and are not attributed to you or your institution.');
+  card.appendChild(conf);
+
+  const start = el('button','btn','Begin survey');
+  start.onclick = () => { state.view='survey'; state.step=0; render(); };
+  card.appendChild(start);
+  return card;
+}
+
+function isAnswered(step){
+  const a = state.answers[step.key];
+  if(step.optional) return true;
+  if(step.type==='multi') return Array.isArray(a) && a.length>0;
+  return a!==undefined && a!==null && a!=='';
+}
+
+function surveyView(){
+  const shell = el('div','survey-shell');
+  const step = STEPS[state.step];
+
+  // desktop ledger
+  const ledger = el('div','ledger');
+  STEPS.forEach((s,i)=>{
+    const item = el('div','ledger-item'+(i<state.step?' done':i===state.step?' current':''));
+    const num = el('div','ledger-num', i<state.step?'\u2713':(i+1));
+    item.appendChild(num);
+    ledger.appendChild(item);
+  });
+  shell.appendChild(ledger);
+
+  const card = el('div','q-card');
+
+  // mobile progress
+  const mp = el('div','mobile-progress');
+  mp.textContent = `Question ${state.step+1} of ${STEPS.length}`;
+  const track = el('div','mobile-progress-bar');
+  const fill = el('div','mobile-progress-fill');
+  fill.style.width = Math.round(((state.step)/ (STEPS.length-1))*100)+'%';
+  track.appendChild(fill);
+  mp.appendChild(track);
+  card.appendChild(mp);
+
+  const eyebrow = step.key==='comment' ? 'Optional \u2014 Final comment' : (step.short ? 'Before we begin' : `Question ${state.step+1}`);
+  card.appendChild(el('div','q-eyebrow', eyebrow));
+  card.appendChild(el('div','q-text', step.text));
+
+  const body = el('div','q-body');
+
+  if(step.type==='single'){
+    step.options.forEach(opt=>{
+      const isOther = step.other && opt==='Other (Specify)';
+      const wrap = el('label','option'+(state.answers[step.key]===opt?' selected':''));
+      const input = document.createElement('input');
+      input.type='radio'; input.name=step.key; input.checked = state.answers[step.key]===opt;
+      input.onchange = ()=>{ state.answers[step.key]=opt; render(); focusOtherIfNeeded(step.key); };
+      wrap.appendChild(input);
+      wrap.appendChild(el('span',null,opt));
+      body.appendChild(wrap);
+      if(isOther && state.answers[step.key]===opt){
+        const ti = document.createElement('input');
+        ti.className='other-input'; ti.placeholder='Please specify';
+        ti.value = state.otherText[step.key]||'';
+        ti.id = 'other-'+step.key;
+        ti.oninput = (e)=>{ state.otherText[step.key]=e.target.value; };
+        body.appendChild(ti);
+      }
+    });
+  }
+  else if(step.type==='multi'){
+    step.options.forEach(opt=>{
+      const arr = state.answers[step.key] || [];
+      const checked = arr.includes(opt);
+      const isOther = step.other && opt==='Other (Specify)';
+      const wrap = el('label','option'+(checked?' selected':''));
+      const input = document.createElement('input');
+      input.type='checkbox'; input.checked=checked;
+      input.onchange = ()=>{
+        let a = state.answers[step.key] || [];
+        if(input.checked) a = [...a, opt]; else a = a.filter(x=>x!==opt);
+        state.answers[step.key]=a;
+        render();
+      };
+      wrap.appendChild(input);
+      wrap.appendChild(el('span',null,opt));
+      body.appendChild(wrap);
+      if(isOther && checked){
+        const ti = document.createElement('input');
+        ti.className='other-input'; ti.placeholder='Please specify';
+        ti.value = state.otherText[step.key]||'';
+        ti.oninput = (e)=>{ state.otherText[step.key]=e.target.value; };
+        body.appendChild(ti);
+      }
+    });
+  }
+  else if(step.type==='rating'){
+    const row = el('div','rating-row');
+    step.options.forEach(opt=>{
+      const btn = el('button','rating-btn'+(state.answers[step.key]===opt.v?' selected':''));
+      btn.type='button';
+      btn.appendChild(el('b',null,opt.v));
+      btn.appendChild(el('span',null,opt.l));
+      btn.onclick = ()=>{ state.answers[step.key]=opt.v; render(); };
+      row.appendChild(btn);
+    });
+    body.appendChild(row);
+  }
+  else if(step.type==='text' && step.short){
+    const ti = document.createElement('input');
+    ti.className='other-input'; ti.type = step.key==='email' ? 'email' : 'text';
+    ti.placeholder = step.optional ? 'Optional' : 'Type your answer';
+    ti.value = state.answers[step.key]||'';
+    ti.oninput = (e)=>{ state.answers[step.key]=e.target.value; };
+    ti.style.fontSize = '16px'; ti.style.padding='14px 16px';
+    body.appendChild(ti);
+  }
+  else if(step.type==='text'){
+    const ta = document.createElement('textarea');
+    ta.placeholder = 'Optional \u2014 share any recommendations...';
+    ta.value = state.answers[step.key]||'';
+    ta.oninput = (e)=>{ state.answers[step.key]=e.target.value; };
+    body.appendChild(ta);
+  }
+
+  card.appendChild(body);
+
+  const nav = el('div','q-nav');
+  const back = el('button','btn secondary', state.step===0 ? 'Cancel' : 'Back');
+  back.onclick = ()=>{
+    if(state.step===0){ state.view='landing'; }
+    else { state.step -= 1; }
+    render();
+  };
+  nav.appendChild(back);
+
+  const isLast = state.step === STEPS.length-1;
+  const next = el('button','btn', state.submitting ? 'Submitting\u2026' : (isLast ? 'Submit survey' : 'Next'));
+  next.disabled = !isAnswered(step) || state.submitting;
+  next.onclick = async ()=>{
+    if(!isAnswered(step)) return;
+    if(isLast){ await submitSurvey(); }
+    else { state.step += 1; render(); }
+  };
+  nav.appendChild(next);
+  card.appendChild(nav);
+
+  shell.appendChild(card);
+  return shell;
+}
+
+function focusOtherIfNeeded(key){
+  setTimeout(()=>{
+    const elx = document.getElementById('other-'+key);
+    if(elx) elx.focus();
+  },0);
+}
+
+async function submitSurvey(){
+  state.submitting = true; render();
+  const payload = {};
+  STEPS.forEach(s=>{
+    let v = state.answers[s.key];
+    if(s.other && state.otherText[s.key]){
+      if(s.type==='single' && v==='Other (Specify)') v = 'Other: '+state.otherText[s.key];
+      if(s.type==='multi' && Array.isArray(v)) v = v.map(x=> x==='Other (Specify)' ? 'Other: '+state.otherText[s.key] : x);
+    }
+    payload[s.key] = v!==undefined ? v : null;
+  });
+  payload.submittedAt = new Date().toISOString();
+
+  if(SCRIPT_URL.indexOf('PASTE_YOUR') === 0){
+    alert('This form is not yet connected to a Google Sheet. Set SCRIPT_URL near the top of the file first.');
+    state.submitting = false; render();
+    return;
+  }
+
+  try{
+    // text/plain avoids a CORS preflight against the Apps Script endpoint.
+    // Apps Script web apps don't return readable CORS headers, so we fire-and-forget
+    // with mode: 'no-cors' and treat "no network error" as success.
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
+      body: JSON.stringify(payload)
+    });
+    state.view='thanks';
+  }catch(err){
+    console.error('Submit error', err);
+    alert('There was a problem submitting your response. Please check your connection and try again.');
+  }
+  state.submitting = false;
+  render();
+}
+
+function thanksView(){
+  const card = el('div','thanks-card');
+  card.appendChild(el('div','thanks-mark','\u2713'));
+  card.appendChild(el('div',null,'Thank you \u2014 your response has been recorded.'));
+  card.querySelector('div:last-child').style.fontFamily = "'Fraunces',serif";
+  card.querySelector('div:last-child').style.fontSize = '18px';
+  const sub = el('p','subtitle','Your answers will be pooled with other institutions and reported only in aggregate form.');
+  sub.style.margin = '12px auto 24px'; sub.style.textAlign='center';
+  card.appendChild(sub);
+  const again = el('button','btn secondary','Submit another response');
+  again.onclick = ()=>{ state.answers={}; state.otherText={}; state.step=0; state.view='survey'; render(); };
+  card.appendChild(again);
+  return card;
+}
+
+function gateView(){
+  const card = el('div','gate-card');
+  card.appendChild(el('div','q-eyebrow','Admin access'));
+  card.appendChild(el('div','q-text','Enter the access code to view aggregated results.'));
+  const input = document.createElement('input');
+  input.type='password'; input.placeholder='Access code';
+  card.appendChild(input);
+  if(state.gateError) card.appendChild(el('div','gate-error', state.gateError));
+  const btn = el('button','btn','View dashboard');
+  btn.onclick = ()=>{
+    if(input.value === ADMIN_CODE){
+      state.view='dashboard'; state.gateError='';
+      render();
+    } else {
+      state.gateError = 'Incorrect code. Please try again.';
+      render();
+    }
+  };
+  input.onkeydown = (e)=>{ if(e.key==='Enter') btn.click(); };
+  card.appendChild(btn);
+  const note = el('p','hint','Note: this code only limits casual access within this tool. Anyone with the code \u2014 or with editing access to this artifact \u2014 can view submitted responses, which are stored as shared data.');
+  note.style.marginTop='16px';
+  card.appendChild(note);
+  return card;
+}
+
+function dashboardView(){
+  const container = el('div');
+  const card = el('div','landing-card');
+  card.appendChild(el('div','q-eyebrow','Live results'));
+  card.appendChild(el('div','q-text','Every submission is written straight to your Google Sheet. The Dashboard tab in that Sheet recalculates automatically \u2014 open it any time to see current totals, breakdowns per question, and every open comment.'));
+  const linkBtn = document.createElement('a');
+  linkBtn.className='btn';
+  linkBtn.textContent='Open Google Sheet';
+  linkBtn.target='_blank'; linkBtn.rel='noopener';
+  linkBtn.style.display='inline-block'; linkBtn.style.textDecoration='none'; linkBtn.style.marginTop='8px';
+  if(SHEET_URL.indexOf('PASTE_YOUR')===0){
+    linkBtn.href='#';
+    linkBtn.textContent='Set SHEET_URL in the file first';
+    linkBtn.style.opacity='0.5'; linkBtn.style.pointerEvents='none';
+  } else {
+    linkBtn.href = SHEET_URL;
+  }
+  card.appendChild(linkBtn);
+  container.appendChild(card);
+  return container;
+}
+
+render();
+</script>
+</body>
+</html>
