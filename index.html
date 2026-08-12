@@ -399,7 +399,7 @@ function surveyView(){
     ti.className='other-input'; ti.type = step.key==='email' ? 'email' : 'text';
     ti.placeholder = step.optional ? 'Optional' : 'Type your answer';
     ti.value = state.answers[step.key]||'';
-    ti.oninput = (e)=>{ state.answers[step.key]=e.target.value; };
+    ti.oninput = (e)=>{ state.answers[step.key]=e.target.value; syncNextButton(step); };
     ti.style.fontSize = '16px'; ti.style.padding='14px 16px';
     body.appendChild(ti);
   }
@@ -407,7 +407,7 @@ function surveyView(){
     const ta = document.createElement('textarea');
     ta.placeholder = 'Optional \u2014 share any recommendations...';
     ta.value = state.answers[step.key]||'';
-    ta.oninput = (e)=>{ state.answers[step.key]=e.target.value; };
+    ta.oninput = (e)=>{ state.answers[step.key]=e.target.value; syncNextButton(step); };
     body.appendChild(ta);
   }
 
@@ -424,6 +424,7 @@ function surveyView(){
 
   const isLast = state.step === STEPS.length-1;
   const next = el('button','btn', state.submitting ? 'Submitting\u2026' : (isLast ? 'Submit survey' : 'Next'));
+  next.id = 'next-btn';
   next.disabled = !isAnswered(step) || state.submitting;
   next.onclick = async ()=>{
     if(!isAnswered(step)) return;
@@ -442,6 +443,11 @@ function focusOtherIfNeeded(key){
     const elx = document.getElementById('other-'+key);
     if(elx) elx.focus();
   },0);
+}
+
+function syncNextButton(step){
+  const btn = document.getElementById('next-btn');
+  if(btn) btn.disabled = !isAnswered(step) || state.submitting;
 }
 
 async function submitSurvey(){
